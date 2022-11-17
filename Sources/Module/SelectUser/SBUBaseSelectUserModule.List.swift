@@ -98,8 +98,8 @@ extension SBUBaseSelectUserModule {
             // tableview
             self.tableView.delegate = self
             self.tableView.dataSource = self
-            self.tableView.bounces = false
-            self.tableView.alwaysBounceVertical = false
+            self.tableView.bounces = true
+            self.tableView.alwaysBounceVertical = true
             self.tableView.separatorStyle = .none
             self.tableView.backgroundView = self.emptyView
             self.tableView.rowHeight = UITableView.automaticDimension
