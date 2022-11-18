@@ -47,6 +47,13 @@ open class SBUBaseSelectUserViewModel: NSObject {
     @SBUAtomic public internal(set) var userList: [SBUUser] = []
     @SBUAtomic public internal(set) var selectedUserList: Set<SBUUser> = []
     
+    public func filteredUserList(filterQuery: String?) -> [SBUUser] {
+        guard let query = filterQuery?.lowercased(), query.count > 0 else { return userList }
+        return userList.filter({
+            $0.nickname?.lowercased().contains(query) == true
+        })
+    }
+    
     public var userListQuery: ApplicationUserListQuery?
     public var memberListQuery: MemberListQuery?
     public var participantListQuery: ParticipantListQuery?

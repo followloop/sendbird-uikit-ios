@@ -19,8 +19,9 @@ public protocol SBUBaseSelectUserModuleListDataSource: AnyObject {
     /// - Parameters:
     ///    - listComponent: `SBUBaseSelectUserModule.List` object.
     ///    - tableView: `UITableView` object from list component.
+    ///    - filterQuery: `String?` object to filter the user list
     /// - Returns: `SBUUser` array object.
-    func baseSelectUserModule(_ listComponent: SBUBaseSelectUserModule.List, usersInTableView tableView: UITableView) -> [SBUUser]?
+    func baseSelectUserModule(_ listComponent: SBUBaseSelectUserModule.List, usersInTableView tableView: UITableView, filterQuery: String?) -> [SBUUser]?
     
     /// Ask the data source to return the selected user list.
     /// - Parameters:
@@ -41,6 +42,9 @@ extension SBUBaseSelectUserModule {
         
         /// The table view to show user list in the channel.
         public var tableView = UITableView()
+        
+        /// Search bar
+        public lazy var searchBar: UISearchBar = UISearchBar()
         
         /// A view that shows when there is no message in the channel.
         public var emptyView: UIView? = nil {
@@ -72,7 +76,7 @@ extension SBUBaseSelectUserModule {
         
         /// The list of all users shown
         public var userList: [SBUUser]? {
-            self.baseDataSource?.baseSelectUserModule(self, usersInTableView: self.tableView)
+            self.baseDataSource?.baseSelectUserModule(self, usersInTableView: self.tableView, filterQuery: self.searchBar.text)
         }
         
         /// The list of the selected users
@@ -110,11 +114,22 @@ extension SBUBaseSelectUserModule {
             if self.userCell == nil {
                 self.register(userCell: SBUUserCell())
             }
+            
+            // search
+            searchBar.searchBarStyle = UISearchBar.Style.default
+            searchBar.placeholder = "Search"
+            searchBar.sizeToFit()
+            searchBar.isTranslucent = false
+            searchBar.backgroundImage = UIImage()
+            searchBar.delegate = self
+            self.addSubview(searchBar)
         }
         
         /// Sets layouts of the views in the list component.
         open func setupLayouts() {
-            self.tableView.sbu_constraint(equalTo: self, left: 0, right: 0, top: 0, bottom: 0)
+            self.searchBar.sbu_constraint(equalTo: self, left: 0, right: 0, top: 0)
+            self.tableView.sbu_constraint(equalTo: self, left: 0, right: 0, bottom: 0)
+            self.tableView.sbu_constraint(equalTo: self, top: self.searchBar.bounds.height)
         }
         
         /// Sets up style with theme. If the `theme` is `nil`, it uses the stored theme.
@@ -221,5 +236,12 @@ extension SBUBaseSelectUserModule.List: UITableViewDataSource, UITableViewDelega
         self.configureCell(cell, indexPath: indexPath)
         
         return cell ?? UITableViewCell()
+    }
+}
+
+// MARK: - UISearchBarDelegate
+extension SBUBaseSelectUserModule.List: UISearchBarDelegate {
+    public func searchBar(_ searchBar: UISearchBar, textDidChange searchText: String) {
+        self.tableView.reloadData()
     }
 }

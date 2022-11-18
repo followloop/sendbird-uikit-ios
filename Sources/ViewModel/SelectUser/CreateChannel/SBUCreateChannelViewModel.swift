@@ -60,6 +60,13 @@ open class SBUCreateChannelViewModel {
 
     public private(set) var userListQuery: ApplicationUserListQuery? = nil
     
+    public func filteredUserList(filterQuery: String?) -> [SBUUser] {
+        guard let query = filterQuery?.lowercased(), query.count > 0 else { return userList }
+        return userList.filter({
+            $0.nickname?.lowercased().contains(query) == true
+        })
+    }
+    
     
     // MARK: - Property (Private)
     @SBUAtomic private(set) var customizedUsers: [SBUUser]?

@@ -212,8 +212,8 @@ open class SBUCreateChannelViewController: SBUBaseViewController, SBUCreateChann
     
     
     // MARK: - SBUCreateChannelModuleListDataSource
-    open func baseSelectUserModule(_ listComponent: SBUBaseSelectUserModule.List, usersInTableView tableView: UITableView) -> [SBUUser]? {
-        return self.viewModel?.userList
+    open func baseSelectUserModule(_ listComponent: SBUBaseSelectUserModule.List, usersInTableView tableView: UITableView, filterQuery: String?) -> [SBUUser]? {
+        return self.viewModel?.filteredUserList(filterQuery: filterQuery)
     }
     
     open func baseSelectUserModule(_ listComponent: SBUBaseSelectUserModule.List, selectedUsersInTableView tableView: UITableView) -> Set<SBUUser>? {
@@ -223,8 +223,9 @@ open class SBUCreateChannelViewController: SBUBaseViewController, SBUCreateChann
     
     // MARK: - SBUCreateChannelModuleListDelegate
     open func createChannelModule(_ listComponent: SBUCreateChannelModule.List,
-                                  didSelectRowAt indexPath: IndexPath) {
-        guard let user = self.viewModel?.userList[indexPath.row] else { return }
+                                  didSelectRowAt indexPath: IndexPath,
+                                  filterQuery: String?) {
+        guard let user = self.viewModel?.filteredUserList(filterQuery: filterQuery)[indexPath.row] else { return }
         self.viewModel?.selectUser(user: user)
     }
     
