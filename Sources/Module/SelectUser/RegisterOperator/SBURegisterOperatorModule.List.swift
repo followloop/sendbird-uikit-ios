@@ -15,7 +15,8 @@ public protocol SBURegisterOperatorModuleListDelegate: SBUBaseSelectUserModuleLi
     /// - Parameters:
     ///    - listComponent: `SBURegisterOperatorModule.List` object.
     ///    - indexPath: An index path locating the row in table view of `listComponent
-    func registerOperatorModule(_ listComponent: SBURegisterOperatorModule.List, didSelectRowAt indexPath: IndexPath)
+    ///    - filterQuery: `String?` object to filter the user list
+    func registerOperatorModule(_ listComponent: SBURegisterOperatorModule.List, didSelectRowAt indexPath: IndexPath, filterQuery: String?)
     
     /// Called when the tableView detected preloading position in the `listComponent`.
     /// - Parameters:
@@ -113,7 +114,7 @@ extension SBURegisterOperatorModule.List {
 // MARK: - UITableView relations
 extension SBURegisterOperatorModule.List {
     open func tableView(_ tableView: UITableView, didSelectRowAt indexPath: IndexPath) {
-        self.delegate?.registerOperatorModule(self, didSelectRowAt: indexPath)
+        self.delegate?.registerOperatorModule(self, didSelectRowAt: indexPath, filterQuery: searchBar.text)
         
         guard let user = self.userList?[indexPath.row],
               let defaultCell = self.tableView.cellForRow(at: indexPath)
