@@ -36,7 +36,7 @@ public protocol SBUBaseSelectUserViewModelDataSource: AnyObject {
 
 open class SBUBaseSelectUserViewModel: NSObject {
     // MARK: - Constants
-    static let limit: UInt = 20
+    static let limit: UInt = 100
     
     
     // MARK: - Property (Public)
@@ -221,6 +221,20 @@ open class SBUBaseSelectUserViewModel: NSObject {
         }
     }
     
+    /// Sort user list alphabetically & filter users without name
+    private func sortAndFilterUserList() {
+        self.userList = self.userList.filter({
+            return $0.nickname?.isEmpty == false
+        })
+        
+        self.userList.sort { lhs, rhs in
+            if rhs.nickname == nil { return true }
+            if lhs.nickname == nil { return false }
+            guard let lhs = lhs.nickname, let rhs = rhs.nickname else { return true }
+            return lhs.compare(rhs, options: .caseInsensitive) == .orderedAscending
+        }
+    }
+    
     /// This function loads application user list.
     ///
     /// If you want to call a list of users, use the `loadNextUserList(reset:users:)` function.
@@ -272,6 +286,7 @@ open class SBUBaseSelectUserViewModel: NSObject {
         if let channel = channel as? GroupChannel,
            (channel.isBroadcast || channel.isSuper) {
             self.userList += users
+            self.sortAndFilterUserList()
             self.baseDelegate?.baseSelectedUserViewModel(
                 self,
                 didChangeUserList: self.userList,
@@ -282,6 +297,7 @@ open class SBUBaseSelectUserViewModel: NSObject {
 
         guard !self.joinedUserIds.isEmpty else {
             self.userList += users
+            self.sortAndFilterUserList()
             self.baseDelegate?.baseSelectedUserViewModel(
                 self,
                 didChangeUserList: self.userList,
@@ -301,6 +317,7 @@ open class SBUBaseSelectUserViewModel: NSObject {
             )
         } else {
             self.userList += filteredUsers
+            self.sortAndFilterUserList()
             self.baseDelegate?.baseSelectedUserViewModel(
                 self,
                 didChangeUserList: self.userList,
@@ -358,11 +375,16 @@ open class SBUBaseSelectUserViewModel: NSObject {
             guard !members.isEmpty else { return }
             
             self.userList += members
+            self.sortAndFilterUserList()
             self.baseDelegate?.baseSelectedUserViewModel(
                 self,
                 didChangeUserList: self.userList,
                 needsToReload: true
             )
+            
+            if self.memberListQuery?.hasNext == true {
+                self.loadNextUserList(reset: false)
+            }
         })
     }
     
@@ -413,11 +435,16 @@ open class SBUBaseSelectUserViewModel: NSObject {
             guard !users.isEmpty else { return }
             
             self.userList += users.sbu_updateOperatorStatus(channel: channel)
+            self.sortAndFilterUserList()
             self.baseDelegate?.baseSelectedUserViewModel(
                 self,
                 didChangeUserList: self.userList,
                 needsToReload: true
             )
+            
+            if self.participantListQuery?.hasNext == true {
+                self.loadNextUserList(reset: false)
+            }
         })
     }
     

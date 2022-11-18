@@ -185,6 +185,7 @@ open class SBUCreateChannelViewModel {
         
     }
     
+    /// Sort user list alphabetically & filter users without name
     private func sortAndFilterUserList() {
         self.userList = self.userList.filter({
             return $0.nickname?.isEmpty == false
