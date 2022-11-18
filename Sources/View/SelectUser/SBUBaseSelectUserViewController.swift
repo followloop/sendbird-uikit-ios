@@ -141,8 +141,8 @@ open class SBUBaseSelectUserViewController: SBUBaseViewController, SBUBaseSelect
     
     // MARK: - SBUBaseSelectUserModuleListDataSource
     open func baseSelectUserModule(_ listComponent: SBUBaseSelectUserModule.List,
-                                   usersInTableView tableView: UITableView) -> [SBUUser]? {
-        return self.baseViewModel?.userList
+                                   usersInTableView tableView: UITableView, filterQuery: String?) -> [SBUUser]? {
+        return self.baseViewModel?.filteredUserList(filterQuery: filterQuery)
     }
     
     open func baseSelectUserModule(_ listComponent: SBUBaseSelectUserModule.List,

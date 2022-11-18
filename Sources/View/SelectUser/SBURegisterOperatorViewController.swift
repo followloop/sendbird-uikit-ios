@@ -183,8 +183,9 @@ open class SBURegisterOperatorViewController: SBUBaseSelectUserViewController, S
     
     // MARK: - SBURegisterOperatorModuleHeaderDelegate
     open func registerOperatorModule(_ listComponent: SBURegisterOperatorModule.List,
-                                  didSelectRowAt indexPath: IndexPath) {
-        guard let user = self.viewModel?.userList[indexPath.row] else { return }
+                                  didSelectRowAt indexPath: IndexPath,
+                                     filterQuery: String?) {
+        guard let user = self.viewModel?.filteredUserList(filterQuery: filterQuery)[indexPath.row] else { return }
         self.viewModel?.selectUser(user: user)
     }
     
