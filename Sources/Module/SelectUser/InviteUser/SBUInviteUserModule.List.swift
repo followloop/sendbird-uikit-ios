@@ -14,7 +14,8 @@ public protocol SBUInviteUserModuleListDelegate: SBUBaseSelectUserModuleListDele
     /// - Parameters:
     ///    - listComponent: `SBUInviteUserModule.List` object.
     ///    - indexPath: An index path locating the row in table view of `listComponent
-    func inviteUserModule(_ listComponent: SBUInviteUserModule.List, didSelectRowAt indexPath: IndexPath)
+    ///    - filterQuery: `String?` object to filter the user list
+    func inviteUserModule(_ listComponent: SBUInviteUserModule.List, didSelectRowAt indexPath: IndexPath, filterQuery: String?)
     
     /// Called when the tableView detected preloading position in the `listComponent`.
     /// - Parameters:
@@ -102,7 +103,7 @@ extension SBUInviteUserModule.List {
 // swiftlint:disable missing_docs
 extension SBUInviteUserModule.List {
     open func tableView(_ tableView: UITableView, didSelectRowAt indexPath: IndexPath) {
-        self.delegate?.inviteUserModule(self, didSelectRowAt: indexPath)
+        self.delegate?.inviteUserModule(self, didSelectRowAt: indexPath, filterQuery: searchBar.text)
         
         guard let user = self.userList?[indexPath.row],
               let defaultCell = self.tableView.cellForRow(at: indexPath)

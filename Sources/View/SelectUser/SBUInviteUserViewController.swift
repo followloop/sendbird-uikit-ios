@@ -158,8 +158,9 @@ open class SBUInviteUserViewController: SBUBaseSelectUserViewController, SBUInvi
     
     // MARK: - SBUInviteUserModuleListDelegate
     open func inviteUserModule(_ listComponent: SBUInviteUserModule.List,
-                               didSelectRowAt indexPath: IndexPath) {
-        guard let user = self.viewModel?.userList[indexPath.row] else { return }
+                               didSelectRowAt indexPath: IndexPath,
+                               filterQuery: String?) {
+        guard let user = self.viewModel?.filteredUserList(filterQuery: filterQuery)[indexPath.row] else { return }
         self.viewModel?.selectUser(user: user)
     }
     

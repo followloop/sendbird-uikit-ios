@@ -46,7 +46,7 @@ public protocol SBUUserListViewModelDataSource: AnyObject {
 
 open class SBUUserListViewModel: NSObject {
     // MARK: - Constants
-    static let limit: UInt = 20
+    static let limit: UInt = 100
     
     // MARK: - Property (Public)
     public weak var delegate: SBUUserListViewModelDelegate?
@@ -218,11 +218,13 @@ open class SBUUserListViewModel: NSObject {
             SBULog.info("\(users.count) customized users have been added.")
             
             self.userList += users
+            self.sortAndFilterUserList()
             self.isLoading = false
             self.delegate?.shouldUpdateLoadingState(false)
             self.delegate?.userListViewModel(self, didChangeUsers: self.userList, needsToReload: true)
         } else if self.useCustomizedUsers, let customizedUsers = self.customizedUsers {
             self.userList += customizedUsers
+            self.sortAndFilterUserList()
             self.isLoading = false
             self.delegate?.shouldUpdateLoadingState(false)
             self.delegate?.userListViewModel(self, didChangeUsers: self.userList, needsToReload: true)
@@ -245,6 +247,20 @@ open class SBUUserListViewModel: NSObject {
             default:
                 break
             }
+        }
+    }
+    
+    /// Sort user list alphabetically & filter users without name
+    private func sortAndFilterUserList() {
+        self.userList = self.userList.filter({
+            return $0.nickname?.isEmpty == false
+        })
+        
+        self.userList.sort { lhs, rhs in
+            if rhs.nickname == nil { return true }
+            if lhs.nickname == nil { return false }
+            guard let lhs = lhs.nickname, let rhs = rhs.nickname else { return true }
+            return lhs.compare(rhs, options: .caseInsensitive) == .orderedAscending
         }
     }
 
@@ -281,7 +297,12 @@ open class SBUUserListViewModel: NSObject {
             SBULog.info("[Response] \(members.count) members")
 
             self.userList += members
+            self.sortAndFilterUserList()
             self.delegate?.userListViewModel(self, didChangeUsers: self.userList, needsToReload: true)
+            
+            if self.memberListQuery?.hasNext == true {
+                self.loadNextUserList(reset: false)
+            }
         })
     }
     
@@ -319,7 +340,12 @@ open class SBUUserListViewModel: NSObject {
             SBULog.info("[Response] \(operators.count) operators")
 
             self.userList += operators
+            self.sortAndFilterUserList()
             self.delegate?.userListViewModel(self, didChangeUsers: self.userList, needsToReload: true)
+            
+            if self.operatorListQuery?.hasNext == true {
+                self.loadNextUserList(reset: false)
+            }
         })
     }
     
@@ -357,7 +383,12 @@ open class SBUUserListViewModel: NSObject {
             SBULog.info("[Response] \(members.count) members")
 
             self.userList += members
+            self.sortAndFilterUserList()
             self.delegate?.userListViewModel(self, didChangeUsers: self.userList, needsToReload: true)
+            
+            if self.mutedMemberListQuery?.hasNext == true {
+                self.loadNextUserList(reset: false)
+            }
         })
     }
     
@@ -396,7 +427,12 @@ open class SBUUserListViewModel: NSObject {
             SBULog.info("[Response] \(members.count) members")
 
             self.userList += members.sbu_updateOperatorStatus(channel: channel)
+            self.sortAndFilterUserList()
             self.delegate?.userListViewModel(self, didChangeUsers: self.userList, needsToReload: true)
+            
+            if self.mutedParticipantListQuery?.hasNext == true {
+                self.loadNextUserList(reset: false)
+            }
         })
     }
     
@@ -434,7 +470,12 @@ open class SBUUserListViewModel: NSObject {
             SBULog.info("[Response] \(users.count) users")
 
             self.userList += users
+            self.sortAndFilterUserList()
             self.delegate?.userListViewModel(self, didChangeUsers: self.userList, needsToReload: true)
+            
+            if self.bannedUserListQuery?.hasNext == true {
+                self.loadNextUserList(reset: false)
+            }
         })
     }
     
@@ -472,7 +513,12 @@ open class SBUUserListViewModel: NSObject {
             SBULog.info("[Response] \(participants.count) participants")
 
             self.userList += participants.sbu_updateOperatorStatus(channel: channel)
+            self.sortAndFilterUserList()
             self.delegate?.userListViewModel(self, didChangeUsers: self.userList, needsToReload: true)
+            
+            if self.participantListQuery?.hasNext == true {
+                self.loadNextUserList(reset: false)
+            }
         })
     }
     

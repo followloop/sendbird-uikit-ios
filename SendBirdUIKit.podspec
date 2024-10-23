@@ -16,7 +16,7 @@ Pod::Spec.new do |s|
 	"Kai" => "kai.lee@sendbird.com"
   	}
 	s.platform = :ios, "12.0"
-	s.source = { :git => "https://github.com/sendbird/sendbird-uikit-ios.git", :tag => "#{s.version}" }
+	s.source = { :git => "https://github.com/followloop/sendbird-uikit-ios.git", :tag => "#{s.version}" }
 	s.ios.vendored_frameworks = 'Framework/SendbirdUIKit.xcframework'
 	s.ios.frameworks = ["UIKit", "Foundation", "CoreData", "SendbirdChatSDK"]
 	s.requires_arc = true

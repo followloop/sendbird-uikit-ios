@@ -44,7 +44,7 @@ public protocol SBUCreateChannelViewModelDataSource: AnyObject {
 /// `SBUCreateChannelViewModel` is a class that handles the creation of channels.
 open class SBUCreateChannelViewModel {
     // MARK: - Constants
-    static let limit: UInt = 20
+    static let limit: UInt = 100
     
     // MARK: - Property (Public)
     /// Delegate for `SBUCreateChannelViewModel`
@@ -61,7 +61,14 @@ open class SBUCreateChannelViewModel {
     @SBUAtomic public private(set) var selectedUserList: Set<SBUUser> = []
 
     /// The query object for fetching the application user list.
-    public private(set) var userListQuery: ApplicationUserListQuery?
+    public private(set) var userListQuery: ApplicationUserListQuery? = nil
+    
+    public func filteredUserList(filterQuery: String?) -> [SBUUser] {
+        guard let query = filterQuery?.lowercased(), query.count > 0 else { return userList }
+        return userList.filter({
+            $0.nickname?.lowercased().contains(query) == true
+        })
+    }
     
     // MARK: - Property (Private)
     @SBUAtomic private(set) var customizedUsers: [SBUUser]?
@@ -123,19 +130,26 @@ open class SBUCreateChannelViewModel {
             SBULog.info("\(users.count) customized users have been added.")
             
             self.userList += users
+            self.sortAndFilterUserList()
             self.delegate?.shouldUpdateLoadingState(false)
             self.delegate?.createChannelViewModel(
                 self,
                 didChangeUsers: self.userList,
                 needsToReload: true
             )
-        } else {
-            guard !self.useCustomizedUsers else {
-                self.delegate?.shouldUpdateLoadingState(false)
-                
-                return
-            }
-            
+        }
+        else if self.useCustomizedUsers, let customizedUsers = self.customizedUsers {
+            self.userList += customizedUsers
+            self.sortAndFilterUserList()
+            self.isLoading = false
+            self.delegate?.shouldUpdateLoadingState(false)
+            self.delegate?.createChannelViewModel(
+                self,
+                didChangeUsers: self.userList,
+                needsToReload: true
+            )
+        }
+        else if !self.useCustomizedUsers {
             if self.userListQuery == nil {
                 let params = ApplicationUserListQueryParams()
                 params.limit = SBUCreateChannelViewModel.limit
@@ -166,8 +180,29 @@ open class SBUCreateChannelViewModel {
                 guard !users.isEmpty else { return }
                 
                 self.userList += users
+                self.sortAndFilterUserList()
                 self.delegate?.createChannelViewModel(self, didChangeUsers: self.userList, needsToReload: true)
+                
+                if self.userListQuery?.hasNext == true {
+                    self.loadNextUserList(reset: false)
+                }
             }
+        }
+        
+        
+    }
+    
+    /// Sort user list alphabetically & filter users without name
+    private func sortAndFilterUserList() {
+        self.userList = self.userList.filter({
+            return $0.nickname?.isEmpty == false
+        })
+        
+        self.userList.sort { lhs, rhs in
+            if rhs.nickname == nil { return true }
+            if lhs.nickname == nil { return false }
+            guard let lhs = lhs.nickname, let rhs = rhs.nickname else { return true }
+            return lhs.compare(rhs, options: .caseInsensitive) == .orderedAscending
         }
     }
     
